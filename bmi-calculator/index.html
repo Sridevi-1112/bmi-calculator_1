@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMI Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-tag">Health Tool</div>
+    <h1>Body Mass<br><span>Index</span></h1>
+    <p>Calculate your BMI and get personalised advice, gestures & an actionable weekly plan.</p>
+  </div>
+
+  <div class="card">
+    <div class="toggle-wrap">
+      <button class="toggle-btn active" id="btn-metric" onclick="setUnit('metric')">Metric</button>
+      <button class="toggle-btn" id="btn-imperial" onclick="setUnit('imperial')">Imperial</button>
+    </div>
+
+    <!-- METRIC -->
+    <div id="metric-inputs">
+      <div class="inputs-row">
+        <div class="inp-group">
+          <label>Height</label>
+          <div class="inp-box">
+            <input type="number" id="h-cm" placeholder="170" min="50" max="300" oninput="syncSlider('h-cm','sl-cm',50,220);calculate()">
+            <span class="inp-unit">cm</span>
+          </div>
+        </div>
+        <div class="inp-group">
+          <label>Weight</label>
+          <div class="inp-box">
+            <input type="number" id="w-kg" placeholder="70" min="1" max="300" oninput="syncSlider('w-kg','sl-kg',20,200);calculate()">
+            <span class="inp-unit">kg</span>
+          </div>
+        </div>
+      </div>
+      <div class="inputs-row">
+        <div class="slider-wrap">
+          <div class="slider-label-row"><label>Height</label><span class="slider-val" id="sl-cm-val">—</span></div>
+          <input type="range" id="sl-cm" min="50" max="220" value="170" step="1" oninput="syncInput('sl-cm','h-cm');updateSliderLabel('sl-cm','sl-cm-val','cm');calculate()">
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-label-row"><label>Weight</label><span class="slider-val" id="sl-kg-val">—</span></div>
+          <input type="range" id="sl-kg" min="20" max="200" value="70" step="1" oninput="syncInput('sl-kg','w-kg');updateSliderLabel('sl-kg','sl-kg-val','kg');calculate()">
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPERIAL -->
+    <div id="imperial-inputs" class="hidden">
+      <div class="inputs-row" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="inp-group">
+          <label>Height (ft)</label>
+          <div class="inp-box"><input type="number" id="h-ft" placeholder="5" min="1" max="8" oninput="calculate()"><span class="inp-unit">ft</span></div>
+        </div>
+        <div class="inp-group">
+          <label>Height (in)</label>
+          <div class="inp-box"><input type="number" id="h-in" placeholder="7" min="0" max="11" oninput="calculate()"><span class="inp-unit">in</span></div>
+        </div>
+        <div class="inp-group">
+          <label>Weight</label>
+          <div class="inp-box"><input type="number" id="w-lbs" placeholder="154" min="1" max="660" oninput="calculate()"><span class="inp-unit">lbs</span></div>
+        </div>
+      </div>
+      <div class="inputs-row">
+        <div class="slider-wrap">
+          <div class="slider-label-row"><label>Height (total inches)</label><span class="slider-val" id="sl-in-val">—</span></div>
+          <input type="range" id="sl-in" min="48" max="96" value="67" step="1" oninput="imperialHeightSlider();calculate()">
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-label-row"><label>Weight</label><span class="slider-val" id="sl-lbs-val">—</span></div>
+          <input type="range" id="sl-lbs" min="44" max="440" value="154" step="1" oninput="syncInput('sl-lbs','w-lbs');updateSliderLabel('sl-lbs','sl-lbs-val','lbs');calculate()">
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT AREA -->
+    <div id="result-area">
+      <div class="placeholder" id="placeholder">
+        <div class="placeholder-icon">⚖️</div>
+        <p>Enter your height &amp; weight above to see your BMI &amp; personalised plan</p>
+      </div>
+
+      <div id="result-content" class="hidden">
+
+        <!-- BMI number card -->
+        <div class="result-hero" id="result-card">
+          <div class="bmi-big" id="bmi-num">—</div>
+          <div>
+            <div class="result-cat" id="res-cat">—</div>
+            <div class="result-desc" id="res-desc"></div>
+          </div>
+          <div class="result-badge" id="res-badge"></div>
+        </div>
+
+        <!-- scale bar -->
+        <div class="scale-outer">
+          <div class="scale-title">BMI Scale</div>
+          <div class="scale-track">
+            <div class="scale-bg"></div>
+            <div class="scale-fill" id="scale-fill"></div>
+            <div class="scale-needle" id="needle"></div>
+          </div>
+          <div class="scale-labels">
+            <span>Underweight &lt;18.5</span>
+            <span>Normal 18.5–25</span>
+            <span>Overweight 25–30</span>
+            <span>Obese &gt;30</span>
+          </div>
+        </div>
+
+        <!-- category pills -->
+        <div class="cats-grid">
+          <div class="cat-pill cat-under" id="pill-0"><span class="cp-icon">🌊</span><span class="cp-name">Underweight</span><span class="cp-range">&lt; 18.5</span></div>
+          <div class="cat-pill cat-normal" id="pill-1"><span class="cp-icon">✅</span><span class="cp-name">Normal</span><span class="cp-range">18.5 – 24.9</span></div>
+          <div class="cat-pill cat-over"   id="pill-2"><span class="cp-icon">⚡</span><span class="cp-name">Overweight</span><span class="cp-range">25 – 29.9</span></div>
+          <div class="cat-pill cat-obese"  id="pill-3"><span class="cp-icon">🔥</span><span class="cp-name">Obese</span><span class="cp-range">&ge; 30</span></div>
+        </div>
+
+        <!-- ADVICE SECTION -->
+        <div class="advice-section" id="advice-section">
+
+          <!-- 1. GESTURE BANNER -->
+          <div class="gesture-banner" id="gesture-banner">
+            <div class="big-gesture" id="big-gesture">🎯</div>
+            <div class="gesture-text">
+              <div class="gesture-headline" id="gesture-headline">Your personalised plan</div>
+              <div class="gesture-sub" id="gesture-sub"></div>
+            </div>
+          </div>
+
+          <!-- 2. TARGET WEIGHT RING -->
+          <div id="target-strip-wrap"></div>
+
+          <!-- 3. TIPS HEADING -->
+          <div class="tips-heading" id="tips-heading">Actionable tips for you</div>
+
+          <!-- 4. TIPS GRID -->
+          <div class="tips-grid" id="tips-grid"></div>
+
+          <!-- 5. WEEKLY PLAN -->
+          <div id="week-plan-wrap"></div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    ⚠️ BMI is a general screening tool only. It does not account for muscle mass, bone density, age, sex, or ethnicity. Always consult a qualified healthcare professional for personalised medical advice.
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
